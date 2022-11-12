@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: NetworkPolicy
+metadata:
+  name: my-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      id: frontend
+  policyTypes:
+    - Engress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              id: ns1
+      ports:
+        - protocol: TCP
+          port: 80
+    - to:
+        - podSelector:
+            matchLabels:
+              id: backend

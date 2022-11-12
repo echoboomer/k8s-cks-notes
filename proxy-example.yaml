@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: app
+  name: app
+spec:
+  containers:
+    - command:
+        - sh
+        - -c
+        - ping google.com
+      image: bash
+      name: app
+      resources: {}
+    - name: proxy
+      image: ubuntu
+      command:
+        - sh
+        - -c
+        - 'apt-get update && apt-get install iptables -y && iptables -L && sleep 1d'
+      securityContext:
+        capabilities:
+          add: ['NET_ADMIN']
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always

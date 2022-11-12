@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pod-db-backend-ingress
+  namespace: cassandra
+spec:
+  podSelector:
+    matchLabels:
+      run: db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              id: default
+        - podSelector:
+            matchLabels:
+              run: backend
