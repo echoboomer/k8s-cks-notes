@@ -12,7 +12,7 @@ Three components:
 
 - Authentication - Who are you?
 - Authorization - What are you allowed to do?
-- Admission - admission controllers.
+- Admission - Admission controllers. Uses mutating and validating webhooks, among others, on resources.
 
 Each request to the API is filtered through these.
 
@@ -25,9 +25,7 @@ Requests are treated as:
 Every request must authenticate unless it's anonymous.
 
 - `--anonymous-auth` kubelet flag must be set to `false` to disable anonymous access.
-
 - `/etc/kubernetes/manifests/kube-apiserver.yaml`
-
 - `--insecure-port` is set to `0` by default, which disables the insecure port. Setting this to anything else will also disable Authentication and Authorization.
 
 ## Config
@@ -48,9 +46,9 @@ For example, on a worker `Node`, there is no `kubeconfig` available to use with 
 
 ## Auth
 
-- `k auth can-i delete deploment -A`
+- `k auth can-i delete deployment -A`
 
-By extracting the Kubernetes server `ca` and the user `cert` and `key` from `kubectl config view --raw`, you can actually makes manual API calls against the Kubernetes API:
+By extracting the Kubernetes server `ca` and the user `cert` and `key` from `kubectl config view --raw`, you can actually make manual API calls against the Kubernetes API:
 
 - `curl https://10.142.0.2:6443 --cacert ca --cert cert --key key`
 
@@ -325,7 +323,7 @@ Use Rego playground to test OPA policies.
 
 ## Image Footprints
 
-Remember that containers use cgroups, which means they have acces sto the host OS kernel. It is possible to run containers using the same PID so they share processes.
+Remember that containers use syscalls against the host OS kernel. It is possible to run containers using the same PID so they share processes.
 
 Docker images are built using layers. Only the instructions `RUN`, `COPY`, and `ADD` create layers. Other instructions create temporary intermediate images, and do not increase the size of the build.
 
@@ -364,6 +362,7 @@ This essentially gives you a resulting image that only encompasses the final sta
 Looks at the source code and text files and parses them to check against rules. Those rules can then be enforced.
 
 Examples:
+
 - Always define resource requests and limits.
 - `Pods` should never use the default `ServiceAccount`.
 - Don't store sensitive data in plain text in Dockerfiles or Kubernetes resources.
@@ -392,7 +391,7 @@ You can also use `confest` against Dockerfiles.
 
 Containers that contain exploitable packages are a problem. This could result in privilege escalation, data leaks, DDoS, etc.
 
-https://cve.mitre.org
+https://cve.mitre.org/
 https://nvd.nist.gov/
 
 Tools use these databases to scan images for vulnerabilities. We use the Sysdig inline scanner for this. You could stop a build, or use an Admission Controller to not allow a compromised image version to run in a cluster.
@@ -443,7 +442,7 @@ Applications run in the user space. Applications can communicate with the syscal
 
 `seccomp` and AppArmor lie between the user space and syscall interface for added protection.
 
-Processes in a container are able to communicate with the kernel given how they run in shared spaces. Remember the concept of `cgroups`.
+Processes in a container are able to communicate with the kernel given how they run in shared spaces. They're namespaced via container logic, but can still talk to the kernel.
 
 `strace` intercepts and logs system calls made by a process. It can also log and display signals received by a process so it's good for debugging etc.
 
@@ -451,12 +450,12 @@ Processes in a container are able to communicate with the kernel given how they 
 
 This would provide a list of syscalls made to the kernel.
 
-In the end, all commands ran on the command line result in syscalls for how they operate.
+In the end, all commands run on the command line result in syscalls for how they operate.
 
 - `/proc` directory contains information and connections to processes and kernel.
 - Study it to learn how processes work.
 - Configuration and administrative tasks.
-- Contains files that don't exist, yet you can access these.
+- Contains files that don't technically exist.
 
 You can do `docker ps | grep etcd` and then `ps aux | grep etcd` to find the running `etcd` process.
 
@@ -472,11 +471,11 @@ You could use this to find the `pid` of a running container, navigate to its `/p
 
 ### Falco
 
-CNCF native runtime security. Deep kernel tracing build on the Linux kernel.
+CNCF native runtime security. Deep kernel tracing built on the Linux kernel.
 
 Describe security rules against a system, detect unwanted behavior.
 
-Automated response to a security violations.
+Automated response to security violations.
 
 Kubernetes docs has a page specific to Falco with instructions for installation.
 
